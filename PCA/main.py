@@ -4,6 +4,7 @@ import cv2
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA, IncrementalPCA
 import pickle
+from sys import getsizeof
 
 def required_num_components(single_channel_img, variance_percentage=90.0):
     img = np.array(single_channel_img, dtype=np.float)
@@ -20,11 +21,11 @@ def required_num_components(single_channel_img, variance_percentage=90.0):
 
 def pca_compress_channel(X, k):
     incr_pca = IncrementalPCA(n_components=k)
-    X_reduced = incr_pca.fit_transform(X)
+    X_reduced = incr_pca.fit_transform(X).astype(np.float16)
     return (X_reduced, incr_pca)
 
 
-def pca_decompress_channel():    
+def pca_decompress_channel():
     pass
 
 
@@ -41,7 +42,10 @@ def main():
     print("Output Image: {}".format(args.output))
     print("Total Variance: {}".format(args.var))
 
-    img = cv2.imread(args.input)
+    raw_img = cv2.imread(args.input)
+
+    # preprocess image force image 
+    img = ((raw_img / 255.000) - 0.500).astype(np.float16)
 
     separate_channels = []
 
@@ -52,13 +56,23 @@ def main():
     else:
         separate_channels.append(img)
 
+    # getting required number of components for each channel
     num_components = list(map(required_num_components, separate_channels, 
                         np.ones(len(separate_channels), dtype=np.float) * args.var))
 
+    # compressing each channel
     compressed_data = list(map(pca_compress_channel, separate_channels, num_components))
 
+    # writing the compressed data to the file
     with open(args.output, 'wb') as fout:
         pickle.dump(compressed_data, fout)
+
+    sz_compressed_data = getsizeof(compressed_data)
+    sz_img = img.nbytes
+
+    print("Size of the compressed data: {}".format(sz_compressed_data))
+    print("Size of the raw data: {}".format(sz_img))
+    print("Compression Ratio: {}".format(sz_img/sz_compressed_data))
 
 
 if __name__=="__main__":
