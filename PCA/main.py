@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA, IncrementalPCA
+import pickle
 
 def required_num_components(single_channel_img, variance_percentage=90.0):
     img = np.array(single_channel_img, dtype=np.float)
@@ -17,17 +18,20 @@ def required_num_components(single_channel_img, variance_percentage=90.0):
     return num_components
     
 
-def pca_compress(img, k):
-    pass
+def pca_compress_component(X, k):
+    incr_pca = IncrementalPCA(n_components=k)
+    X_reduced = incr_pca.fit_transform(X)
+    return (X_reduced, incr_pca)
 
 
-def pca_decompress(data):
+def pca_decompress_component():    
     pass
+
 
 def main():
     parser = argparse.ArgumentParser(description='Using the PCA for image compression.')
     parser.add_argument('input', type=str, help='Path for input image')
-    parser.add_argument('output', type=str, help='Path for output image')
+    parser.add_argument('output', type=str, help='Path for output data')
     parser.add_argument('--var', '--total_variance', type=float, default=90.0, 
                         help='Total variance % to be covered by PCA')
 
@@ -50,7 +54,6 @@ def main():
 
     num_components = list(map(required_num_components, separate_channels, 
                         np.ones(len(separate_channels), dtype=np.float) * args.var))
-
 
 
 if __name__=="__main__":
