@@ -18,13 +18,13 @@ def required_num_components(single_channel_img, variance_percentage=90.0):
     return num_components
     
 
-def pca_compress_component(X, k):
+def pca_compress_channel(X, k):
     incr_pca = IncrementalPCA(n_components=k)
     X_reduced = incr_pca.fit_transform(X)
     return (X_reduced, incr_pca)
 
 
-def pca_decompress_component():    
+def pca_decompress_channel():    
     pass
 
 
@@ -54,6 +54,11 @@ def main():
 
     num_components = list(map(required_num_components, separate_channels, 
                         np.ones(len(separate_channels), dtype=np.float) * args.var))
+
+    compressed_data = list(map(pca_compress_channel, separate_channels, num_components))
+
+    with open(args.output, 'wb') as fout:
+        pickle.dump(compressed_data, fout)
 
 
 if __name__=="__main__":
