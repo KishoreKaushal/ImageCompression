@@ -78,8 +78,8 @@ def main():
     compressed_data = list(map(pca_compress_channel, separate_channels, num_components))
 
     # writing the compressed data to the file
-    with open(args.output, 'wb') as fout:
-        pickle.dump(compressed_data, fout)
+    # with open(args.output, 'wb') as fout:
+    #     pickle.dump(compressed_data, fout)
 
     # computing the size and compression ratio
     
@@ -113,7 +113,7 @@ def main():
     recon_im = recon_im.astype(np.uint8)
 
     # saving images for comparison
-    output_path = args.output + "-recon.jpg"
+    output_path = args.output + "-recon-{}.jpg".format(args.var)
     cv2.imwrite(output_path, recon_im)
 
 
