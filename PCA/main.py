@@ -28,8 +28,8 @@ def pca_compress_channel(X, k):
     return (X_reduced, incr_pca)
 
 
-def pca_decompress_channel():
-    pass
+def pca_decompress_channel(X_reduced, incr_pca):
+    return incr_pca.inverse_transform(X_reduced)
 
 
 def main():
@@ -91,6 +91,30 @@ def main():
     print("Size of the compressed data: {}".format(sz_compressed_data))
     print("Size of the raw data: {}".format(sz_img))
     print("Compression Ratio: {}".format(sz_img/sz_compressed_data))
+
+    # decompressed image
+    decompressed_data = []
+    for (X_reduced, ipca) in compressed_data:
+        decompressed_data.append(pca_decompress_channel(X_reduced, ipca))
+
+    im_shape = decompressed_data[-1].shape
+
+    # reconstructing image
+    if num_channels == 1:
+        recon_im = np.zeros(shape=im_shape, dtype=np.uint8)
+        decompressed_data
+    else:
+        recon_im = np.zeros(shape=im_shape + tuple([num_channels]), dtype=np.float16)
+        
+        for i in range(num_channels):
+            recon_im[:,:,i] = decompressed_data[i]
+    
+    recon_im = (recon_im + 0.500) * 255.0
+    recon_im = recon_im.astype(np.uint8)
+
+    # saving images for comparison
+    output_path = args.output + "-recon.jpg"
+    cv2.imwrite(output_path, recon_im)
 
 
 if __name__=="__main__":
