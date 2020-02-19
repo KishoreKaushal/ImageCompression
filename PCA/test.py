@@ -23,7 +23,7 @@ for img_path in img_paths:
     raw_img = cv2.imread(img_path)
     num_channels = raw_img.shape[2]
 
-    output = []
+    output = [cv2.cvtColor(raw_img, cv2.COLOR_BGR2RGB)]
     separate_channels = []
 
     # separating RGB channels
@@ -94,3 +94,26 @@ for img_path in img_paths:
         print("SSIM : {}".format(ssim_curr))
 
         output.append((cv2.cvtColor(recon_im, cv2.COLOR_BGR2RGB), compression_ratio, ssim_curr))
+    
+    results.append(output)
+
+
+
+fig, ax = plt.subplots( len(results),  len(test_variances) + 1, figsize=(25,10))
+
+for i in range(len(results)):
+    for j in range(len(test_variances) + 1):
+        data = results[i][j]
+        ax[i, j].axis('off')
+
+        if j != 0:  # reconstructed image
+            im, cr, ssm = data
+            ax[i, j].imshow(im)
+            ax[i, j].set_title("CR: {}, SSIM:{}".format(np.round(cr, 3), np.round(ssm, 2)))
+        else:       # ground truth
+            im = data 
+            ax[i,j].imshow(im)
+            ax[i,j].set_title("Ground Truth")
+
+plt.tight_layout()
+plt.show()
