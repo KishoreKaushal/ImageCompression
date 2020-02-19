@@ -34,8 +34,8 @@ def pca_decompress_channel(X_reduced, incr_pca):
 
 def main():
     parser = argparse.ArgumentParser(description='Using the PCA for image compression.')
-    parser.add_argument('input', type=str, help='Path for input image')
-    parser.add_argument('output', type=str, help='Path for output data')
+    parser.add_argument('-input', type=str, help='Path for input image')
+    parser.add_argument('-output', type=str, help='Path for output data')
     parser.add_argument('--var', '--total_variance', type=float, default=DEFAULT_VARIANCE_PERCENT, 
                         help='Total variance % to be covered by PCA')
 
@@ -46,19 +46,25 @@ def main():
     print("Total Variance: {}".format(args.var))
 
     raw_img = cv2.imread(args.input)
+    print(raw_img.shape)
     num_channels = raw_img.shape[2]
-
-    # preprocess image force image 
-    img = ((raw_img / 255.000) - 0.500).astype(np.float16)
 
     separate_channels = []
 
     # separating RGB channels
-    if img.ndim == 3:
+    if raw_img.ndim == 3:
         for i in range(num_channels):
-            separate_channels.append(img[:,:,i])
+            separate_channels.append(raw_img[:,:,i])
     else:
-        separate_channels.append(img)
+        separate_channels.append(raw_img)
+
+    std = list(map(np.std, separate_channels))
+    mean = list(map(np.mean, separate_channels))
+
+    # preprocess image force image 
+    separate_channels = list(map(lambda x,m,s: (x-m)/s, separate_channels, mean, std))
+    
+    img = ((raw_img / 255.000) - 0.500).astype(np.float16)
 
     # getting required number of components for each channel
     num_components = list(map(required_num_components, separate_channels, 
@@ -102,14 +108,14 @@ def main():
     # reconstructing image
     if num_channels == 1:
         recon_im = np.zeros(shape=im_shape, dtype=np.uint8)
-        decompressed_data
+        recon_im = decompressed_data * std[-1] + mean[-1]
     else:
         recon_im = np.zeros(shape=im_shape + tuple([num_channels]), dtype=np.float16)
         
         for i in range(num_channels):
-            recon_im[:,:,i] = decompressed_data[i]
+            recon_im[:,:,i] = decompressed_data[i] * std[i] + mean[i]
     
-    recon_im = (recon_im + 0.500) * 255.0
+    # recon_im = (recon_im + 0.500) * 255.0
     recon_im = recon_im.astype(np.uint8)
 
     # saving images for comparison
