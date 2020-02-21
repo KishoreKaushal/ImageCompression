@@ -93,7 +93,7 @@ for img_path in img_paths:
         ssim_curr = ssim(raw_img, recon_im, data_range=recon_im.max() - recon_im.min(), multichannel=True)
         print("SSIM : {}".format(ssim_curr))
 
-        output.append((cv2.cvtColor(recon_im, cv2.COLOR_BGR2RGB), compression_ratio, ssim_curr))
+        output.append((cv2.cvtColor(recon_im, cv2.COLOR_BGR2RGB), compression_ratio, ssim_curr, var))
     
     results.append(output)
 
@@ -107,9 +107,10 @@ for i in range(len(results)):
         ax[i, j].axis('off')
 
         if j != 0:  # reconstructed image
-            im, cr, ssm = data
+            im, cr, ssm, var = data
             ax[i, j].imshow(im)
-            ax[i, j].set_title("CR: {}, SSIM:{}".format(np.round(cr, 3), np.round(ssm, 2)))
+            ax[i, j].set_title("CR: {}, SSIM:{}, VAR:{}"
+                    .format(np.round(cr, 3), np.round(ssm, 2), var), fontsize=12)
         else:       # ground truth
             im = data 
             ax[i,j].imshow(im)
