@@ -20,7 +20,7 @@ opencv-python == 4.1.2.30
 opencv-python-aarch64 == 3.3.0.1
 
 # main.py: 3
-opencv-python-headless == 4.1.2.30
+opencv-python-headless == 4.2.0.32
 
 # main.py: 5
 scikit_learn == 0.22.1
